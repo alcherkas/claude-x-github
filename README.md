@@ -44,9 +44,9 @@ Runs on every push and PR to `main`. Steps:
 
 ### 2. Claude Code Review (`claude-code.yml`)
 
-AI-powered code review using Anthropic's Claude Code Action. Triggers on:
+AI-powered code review using Anthropic's Claude Code Action. Focuses exclusively on PRs:
 - **Pull request opened/updated** — automatic review
-- **Issue comment** — on-demand when a comment contains `@claude`
+- **PR review comment** — on-demand when a review comment contains `@claude`
 
 ### Setup: `CLAUDE_CODE_OAUTH_TOKEN`
 
