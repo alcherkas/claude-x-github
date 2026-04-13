@@ -17,7 +17,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +30,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           # Prompt for Claude code review
           prompt: |
             Review this pull request. Focus on:
