@@ -1,0 +1,44 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  claude-code-review:
+    # Run on PR events, or on issue comments that mention @claude and are on PRs
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       contains(github.event.comment.body, '@claude'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Run Claude Code Action
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_tools: "bash,computer,mcp__github"
+          # Direct prompt to Claude for code review
+          direct_prompt: |
+            Review this pull request. Focus on:
+            - Code quality and best practices for .NET
+            - Potential bugs or issues
+            - Test coverage
+            - Security concerns
+          # Custom trigger phrase - users can comment "@claude" to invoke
+          trigger_phrase: "@claude"
