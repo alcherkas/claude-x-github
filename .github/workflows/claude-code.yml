@@ -31,6 +31,7 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          allowed_bots: "Copilot"
           # Prompt for Claude code review
           prompt: |
             Review this pull request. Focus on:
