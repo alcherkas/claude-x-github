@@ -34,6 +34,58 @@ app.MapGet("/weatherforecast", () =>
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }))
    .WithName("HealthCheck");
 
+app.MapGet("/hello/{name}", (string name) => Results.Ok(new { greeting = $"Hello, {name}!" }))
+   .WithName("GetHello");
+
+app.MapGet("/time", () => Results.Ok(new { utc = DateTime.UtcNow, local = DateTime.Now, timezone = TimeZoneInfo.Local.Id }))
+   .WithName("GetTime");
+
+app.MapGet("/echo", (string? message) =>
+{
+    if (string.IsNullOrWhiteSpace(message))
+        return Results.BadRequest(new { error = "Query parameter 'message' is required" });
+    return Results.Ok(new { original = message, reversed = new string(message.Reverse().ToArray()), length = message.Length });
+})
+.WithName("Echo");
+
+// SQL query endpoint - executes raw user input
+app.MapGet("/search", (string query) =>
+{
+    var sql = "SELECT * FROM users WHERE name = '" + query + "'";
+    return Results.Ok(new { query = sql });
+})
+.WithName("Search");
+
+// Returns all environment variables
+app.MapGet("/debug/env", () =>
+{
+    var vars = Environment.GetEnvironmentVariables();
+    return Results.Ok(vars);
+})
+.WithName("DebugEnv");
+
+// TODO: add authentication later
+app.MapPost("/admin/reset", () =>
+{
+    // resets everything, no auth check
+    return Results.Ok(new { status = "reset complete" });
+})
+.WithName("AdminReset");
+
+// Catches all exceptions and returns full stack trace
+app.MapGet("/divide", (int a, int b) =>
+{
+    try
+    {
+        return Results.Ok(new { result = a / b });
+    }
+    catch (Exception ex)
+    {
+        return Results.Ok(new { error = ex.ToString() });
+    }
+})
+.WithName("Divide");
+
 app.Run();
 
 /// <summary>Weather forecast record.</summary>
