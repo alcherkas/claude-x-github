@@ -8,9 +8,9 @@ on:
 
 jobs:
   claude-code-review:
-    # Run on PR events, or on PR review comments that mention @claude
+    # Run on PR events (skip if triggered by Copilot bot), or on PR review comments that mention @claude
     if: |
-      github.event_name == 'pull_request' ||
+      (github.event_name == 'pull_request' && github.actor != 'Copilot' && github.actor != 'copilot' && github.actor != 'copilot[bot]') ||
       (github.event_name == 'pull_request_review_comment' &&
        contains(github.event.comment.body, '@claude'))
     runs-on: ubuntu-latest
@@ -31,7 +31,7 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          allowed_bots: "claude-code,Copilot"
+          allowed_bots: "claude-code"
           # Prompt for Claude code review
           prompt: |
             Review this pull request. Focus on:
