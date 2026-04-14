@@ -69,6 +69,53 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task GetHello_ReturnsGreeting()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetFromJsonAsync<HelloResponse>("/hello/World");
+
+        Assert.NotNull(response);
+        Assert.Equal("Hello, World!", response.Greeting);
+    }
+
+    [Fact]
+    public async Task GetTime_ReturnsTimeInfo()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/time");
+
+        response.EnsureSuccessStatusCode();
+        var content = await response.Content.ReadFromJsonAsync<TimeResponse>();
+        Assert.NotNull(content);
+        Assert.False(string.IsNullOrEmpty(content.Timezone));
+    }
+
+    [Fact]
+    public async Task GetEcho_ReturnsReversedMessage()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetFromJsonAsync<EchoResponse>("/echo?message=hello");
+
+        Assert.NotNull(response);
+        Assert.Equal("hello", response.Original);
+        Assert.Equal("olleh", response.Reversed);
+        Assert.Equal(5, response.Length);
+    }
+
+    [Fact]
+    public async Task GetEcho_WithoutMessage_ReturnsBadRequest()
+    {
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/echo");
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task GetNonExistent_ReturnsNotFound()
     {
         var client = _factory.CreateClient();
@@ -80,4 +127,7 @@ public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 
     private record RootResponse(string Message, string Version);
     private record HealthResponse(string Status);
+    private record HelloResponse(string Greeting);
+    private record TimeResponse(DateTime Utc, DateTime Local, string Timezone);
+    private record EchoResponse(string Original, string Reversed, int Length);
 }
