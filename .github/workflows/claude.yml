@@ -34,6 +34,11 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Setup Node.js (for Playwright MCP)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1
@@ -41,3 +46,4 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           trigger_phrase: "@claude"
+          allowed_tools: "Bash,WebFetch,WebSearch,mcp__playwright__browser_navigate,mcp__playwright__browser_take_screenshot,mcp__playwright__browser_snapshot,mcp__playwright__browser_click"

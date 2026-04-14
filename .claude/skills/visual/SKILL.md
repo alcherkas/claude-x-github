@@ -30,10 +30,23 @@ Perform a visual review of the Vercel preview deployment for this PR.
    - Get the page accessibility snapshot with `mcp__playwright__browser_snapshot`
    - Navigate to other key routes (e.g. `/health`, `/weatherforecast`) and screenshot those too
 
-4. **Analyze and report findings.** Look for:
-   - Broken layouts or missing elements
-   - Console errors or failed network requests
-   - Visual regressions compared to what the code intends
-   - Accessibility issues visible in the snapshot
+4. **Save and commit screenshots to the PR branch:**
+   ```bash
+   mkdir -p screenshots
+   # After each screenshot, save it to screenshots/ directory
+   git add screenshots/
+   git commit -m "chore: add visual review screenshots"
+   git push
+   ```
 
-5. **Post findings as a PR comment** using `gh pr comment` with a summary of what was reviewed and any issues found. Include screenshots if possible.
+5. **Post findings as a PR comment** using `gh pr comment`. Embed screenshots inline using raw GitHub URLs:
+   ```
+   ![Homepage](https://raw.githubusercontent.com/OWNER/REPO/BRANCH/screenshots/homepage.png)
+   ```
+   Replace OWNER, REPO, and BRANCH with actual values from the environment.
+
+   The comment should include:
+   - Screenshots of each page reviewed
+   - Any visual issues found (broken layouts, missing elements, console errors)
+   - Accessibility issues visible in the snapshot
+   - Overall assessment
