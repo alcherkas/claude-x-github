@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DemoApi Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #333; }
+    header { background: #1a1a2e; color: white; padding: 24px 32px; }
+    header h1 { font-size: 24px; font-weight: 600; }
+    header p { color: #aaa; margin-top: 4px; }
+    .container { max-width: 960px; margin: 32px auto; padding: 0 16px; }
+    .status-bar { display: flex; gap: 16px; margin-bottom: 24px; }
+    .status-card { flex: 1; background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .status-card h3 { font-size: 13px; text-transform: uppercase; color: #888; margin-bottom: 8px; }
+    .status-card .value { font-size: 28px; font-weight: 700; }
+    .status-card .value.healthy { color: #16a34a; }
+    .status-card .value.error { color: #dc2626; }
+    .card { background: white; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 24px; }
+    .card h2 { font-size: 18px; margin-bottom: 16px; border-bottom: 1px solid #eee; padding-bottom: 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 10px 12px; background: #f9f9f9; font-size: 13px; text-transform: uppercase; color: #666; }
+    td { padding: 10px 12px; border-top: 1px solid #eee; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    .badge.cold { background: #dbeafe; color: #1d4ed8; }
+    .badge.mild { background: #fef3c7; color: #b45309; }
+    .badge.hot { background: #fecaca; color: #dc2626; }
+    .loading { color: #888; font-style: italic; }
+    footer { text-align: center; color: #aaa; padding: 32px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>DemoApi Dashboard</h1>
+    <p>Weather forecast & API status</p>
+  </header>
+
+  <div class="container">
+    <div class="status-bar">
+      <div class="status-card">
+        <h3>API Status</h3>
+        <div id="health-status" class="value loading">Checking...</div>
+      </div>
+      <div class="status-card">
+        <h3>Version</h3>
+        <div id="api-version" class="value loading">...</div>
+      </div>
+      <div class="status-card">
+        <h3>Forecasts</h3>
+        <div id="forecast-count" class="value loading">...</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>5-Day Weather Forecast</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Temp (C)</th>
+            <th>Temp (F)</th>
+            <th>Summary</th>
+          </tr>
+        </thead>
+        <tbody id="forecast-body">
+          <tr><td colspan="4" class="loading">Loading forecast data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>DemoApi Dashboard &mdash; Built for Claude Visual Review testing</footer>
+
+  <script>
+    const API_BASE = window.location.origin;
+
+    function tempBadge(celsius) {
+      if (celsius < 5) return 'cold';
+      if (celsius < 25) return 'mild';
+      return 'hot';
+    }
+
+    async function loadHealth() {
+      try {
+        const res = await fetch(`${API_BASE}/health`);
+        const data = await res.json();
+        const el = document.getElementById('health-status');
+        el.textContent = data.status === 'healthy' ? 'Healthy' : 'Down';
+        el.className = `value ${data.status === 'healthy' ? 'healthy' : 'error'}`;
+      } catch {
+        const el = document.getElementById('health-status');
+        el.textContent = 'Offline';
+        el.className = 'value error';
+      }
+    }
+
+    async function loadVersion() {
+      try {
+        const res = await fetch(`${API_BASE}/`);
+        const data = await res.json();
+        document.getElementById('api-version').textContent = data.version;
+        document.getElementById('api-version').className = 'value';
+      } catch {
+        document.getElementById('api-version').textContent = '?';
+        document.getElementById('api-version').className = 'value error';
+      }
+    }
+
+    async function loadForecast() {
+      try {
+        const res = await fetch(`${API_BASE}/weatherforecast`);
+        const data = await res.json();
+        document.getElementById('forecast-count').textContent = data.length;
+        document.getElementById('forecast-count').className = 'value';
+
+        const tbody = document.getElementById('forecast-body');
+        tbody.innerHTML = data.map(f => `
+          <tr>
+            <td>${f.date}</td>
+            <td><span class="badge ${tempBadge(f.temperatureC)}">${f.temperatureC}°C</span></td>
+            <td>${f.temperatureF}°F</td>
+            <td>${f.summary || '—'}</td>
+          </tr>
+        `).join('');
+      } catch {
+        document.getElementById('forecast-body').innerHTML =
+          '<tr><td colspan="4" class="loading">Failed to load forecast data</td></tr>';
+      }
+    }
+
+    loadHealth();
+    loadVersion();
+    loadForecast();
+  </script>
+</body>
+</html>
